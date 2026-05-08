@@ -132,7 +132,7 @@
             display: flex;
             gap: 20px; 
             width: max-content; 
-            animation: scroll-left 100s linear infinite; /* KÉO THỜI GIAN LÊN 18s DO BĂNG ẢNH ĐÃ DÀI HƠN */
+            animation: scroll-left 140s linear infinite; /* KÉO THỜI GIAN LÊN 18s DO BĂNG ẢNH ĐÃ DÀI HƠN */
             padding-left: 20px; 
         }
 
@@ -161,6 +161,15 @@
             height: 180px; /* Khống chế chiều lùn form ngang (Landscape) tự động theo lề 300px */
             object-fit: cover; 
             border-radius: 8px;
+        }
+
+        .film-card img, #finalImage {
+            /* ... giữ các code cũ ... */
+            
+            /* Thêm các dòng này để ảnh sắc nét hơn */
+            image-rendering: -webkit-optimize-contrast; /* Dành cho Safari/Chrome */
+            image-rendering: crisp-edges;
+            backface-visibility: hidden; /* Giúp ảnh không bị mờ khi thực hiện hiệu ứng transition */
         }
 
         .film-card .note {
@@ -558,133 +567,133 @@
                 
                 <!-- BỘ HÌNH CHÍNH TỪ 1 ĐẾN 3 -->
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/6pKW408G/Picture1.jpg" alt="Memory 1">
+                    <img src="images/anh1.jpg" alt="Memory 1">
                     <div class="note">Linh xink iu dẫn dắt team content thật siêu!</div>
                 </div>
                 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/3xh80Bky/Picture2.jpg" alt="Memory 2">
+                    <img src="images/anh2.jpg" alt="Memory 2">
                     <div class="note">Cùng tụi em oanh tạc mọi bảng xếp hạng!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/L8S9gTJn/Picture3.jpg" alt="Memory 3">
+                    <img src="images/anh3.jpg" alt="Memory 3">
                     <div class="note">Làm hết nấc vui chơi hết mình!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/t4bqn5ss/Picture4.jpg" alt="Memory 4">
+                    <img src="images/anh4.jpg" alt="Memory 4">
                     <div class="note">Dễ gì bỏ qua các cuộc vui!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/7Z4HJV5b/Picture5.jpg" alt="Memory 5">
+                    <img src="images/anh5.jpg" alt="Memory 5">
                     <div class="note">Ngủ đủ giấc - Ăn chơi đủ bữa!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/g2pzLDx2/Picture6.jpg" alt="Memory 6">
+                    <img src="images/anh6.jpg" alt="Memory 6">
                     <div class="note">Ngày thường nhìn phèn phèn, lên đồ một phút mấy team khác tàng hình.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/pLvW5ZmV/Picture7.jpg" alt="Memory 7">
+                    <img src="images/anh7.jpg" alt="Memory 7">
                     <div class="note">Linh ngồi điều phối, cả team hết rối.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/qvrJ6LNM/Picture8.jpg" alt="Memory 8">
+                    <img src="images/anh8.jpg" alt="Memory 8">
                     <div class="note">Shopee nổ đơn, đời bớt cô đơn.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/W1VNqnd4/Picture9.png" alt="Memory 9">
+                    <img src="images/anh9.jpg" alt="Memory 9">
                     <div class="note">Linh xinh làm “dáng” sinh</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/g2pzLDxP/Picture10.jpg" alt="Memory 10">
+                    <img src="images/anh10.jpg" alt="Memory 10">
                     <div class="note">Nhiều khoản Linh tài - Tài khoản Linh nhiều!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/6pKW40yk/Picture11.jpg" alt="Memory 11">
+                    <img src="images/anh11.jpg" alt="Memory 11">
                     <div class="note">Cờ đỏ trên tay, content hay mỗi ngày.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/wjzqRV1Y/Picture12.jpg" alt="Memory 11">
+                    <img src="images/anh12.jpg" alt="Memory 11">
                     <div class="note">Content nhìn có vẻ hiền, nhưng khi cầm máy là ghiền selfie.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/7Z4HJV5k/Picture13.jpg" alt="Memory 11">
+                    <img src="images/anh13.jpg" alt="Memory 11">
                     <div class="note">Linh tóc xoăn, deadline không xoắn.</div>
                 </div>
 
                 <!-- ĐỂ VÒNG LẶP LIÊN TỤC VÀ KHÔNG ĐỨT ĐOẠN, HÃY SAO CHÉP Y HỆT LẠI 3 BỨC TRÊN LẦN NỮA -->
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/6pKW408G/Picture1.jpg" alt="Memory 1">
+                    <img src="images/anh1.jpg" alt="Memory 1">
                     <div class="note">Linh xink iu dẫn dắt team content thật siêu!</div>
                 </div>
                 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/3xh80Bky/Picture2.jpg" alt="Memory 2">
+                    <img src="images/anh2.jpg" alt="Memory 2">
                     <div class="note">Cùng tụi em oanh tạc mọi bảng xếp hạng!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/L8S9gTJn/Picture3.jpg" alt="Memory 3">
+                    <img src="images/anh3.jpg" alt="Memory 3">
                     <div class="note">Làm hết nấc vui chơi hết mình!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/t4bqn5ss/Picture4.jpg" alt="Memory 4">
+                    <img src="images/anh4.jpg" alt="Memory 4">
                     <div class="note">Dễ gì bỏ qua các cuộc vui!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/7Z4HJV5b/Picture5.jpg" alt="Memory 5">
+                    <img src="images/anh5.jpg" alt="Memory 5">
                     <div class="note">Ngủ đủ giấc - Ăn chơi đủ bữa!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/g2pzLDx2/Picture6.jpg" alt="Memory 6">
+                    <img src="images/anh6.jpg" alt="Memory 6">
                     <div class="note">Ngày thường nhìn phèn phèn, lên đồ một phút mấy team khác tàng hình.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/pLvW5ZmV/Picture7.jpg" alt="Memory 7">
+                    <img src="images/anh7.jpg" alt="Memory 7">
                     <div class="note">Linh ngồi điều phối, cả team hết rối.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/qvrJ6LNM/Picture8.jpg" alt="Memory 8">
+                    <img src="images/anh8.jpg" alt="Memory 8">
                     <div class="note">Shopee nổ đơn, đời bớt cô đơn.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/W1VNqnd4/Picture9.png" alt="Memory 9">
+                    <img src="images/anh9.jpg" alt="Memory 9">
                     <div class="note">Linh xinh làm “dáng” sinh</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/g2pzLDxP/Picture10.jpg" alt="Memory 10">
+                    <img src="images/anh10.jpg" alt="Memory 10">
                     <div class="note">Nhiều khoản Linh tài - Tài khoản Linh nhiều!</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/6pKW40yk/Picture11.jpg" alt="Memory 11">
+                    <img src="images/anh11.jpg" alt="Memory 11">
                     <div class="note">Cờ đỏ trên tay, content hay mỗi ngày.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/wjzqRV1Y/Picture12.jpg" alt="Memory 11">
+                    <img src="images/anh12.jpg" alt="Memory 11">
                     <div class="note">Content nhìn có vẻ hiền, nhưng khi cầm máy là ghiền selfie.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="https://i.postimg.cc/7Z4HJV5k/Picture13.jpg" alt="Memory 11">
+                    <img src="images/anh13.jpg" alt="Memory 11">
                     <div class="note">Linh tóc xoăn, deadline không xoắn.</div>
                 </div>
 
@@ -703,6 +712,7 @@
         <div class="video-wrapper">
             <!-- playsinline: quan trọng để chạy được trên Safari/iPhone -->
             <video id="birthdayVideo" playsinline>
+                <!-- Vì file video nằm cùng chỗ với index.html, bạn chỉ cần ghi tên file là xong -->
                 <source src="clip.mp4" type="video/mp4">
                 Trình duyệt của bạn không hỗ trợ video.
             </video>
