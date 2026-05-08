@@ -668,17 +668,15 @@
     </div>
 </div>
 
-<!-- THAY THẾ TOÀN BỘ TỪ ĐÂY ĐẾN HẾT THẺ SCRIPT CŨ -->
 <script type="module">
     // 1. Nhúng thư viện Firebase Online
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // 2. CẤU HÌNH FIREBASE (BẠN HÃY DÁN ĐOẠN CONFIG CỦA BẠN VÀO ĐÂY)
+    // 2. CẤU HÌNH FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyAU2Bi_fgyoA96CPXJ806pIf9A1JxbMysg",
         authDomain: "tolinh-76ef6.firebaseapp.com",
-        // Dòng quan trọng nhất bị thiếu đây nè:
         databaseURL: "https://tolinh-76ef6-default-rtdb.asia-southeast1.firebasedatabase.app", 
         projectId: "tolinh-76ef6",
         storageBucket: "tolinh-76ef6.firebasestorage.app",
@@ -691,44 +689,50 @@
     const db = getDatabase(app);
     const wishesRef = ref(db, 'wishes');
 
-    // --- BIẾN TOÀN CỤC ---
-    let isMainLinh = false;
+    // --- KHỞI TẠO BIẾN TOÀN CỤC ---
+    window.isMainLinh = false; // Luôn dùng window. để thống nhất
+    window.currentUser = "Khách ẩn danh";
     let alertCallback = null;
 
-    // --- CÁC HÀM TIỆN ÍCH (PHẢI GẮN VÀO WINDOW ĐỂ ONCLICK HOẠT ĐỘNG) ---
-
+    // --- HÀM CHUYỂN MÀN HÌNH ---
     window.goToScreen = function(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active');
-        checkRotationRequirement();
+        const target = document.getElementById(screenId);
+        if(target) {
+            target.classList.add('active');
+            window.checkRotationRequirement();
+        }
     };
 
-    window.currentUser = "Khách ẩn danh"; 
-
+    // --- HÀM LOGIN (FIX LỖI NHẬN DIỆN LINH) ---
     window.handleLogin = function() {
         let name = document.getElementById('usernameInput').value.trim();
-        if(!name) { customAlert('Nhập tên bạn ơi ^^', '🌸'); return; }
+        if(!name) { window.customAlert('Nhập tên bạn ơi ^^', '🌸'); return; }
+        
         window.currentUser = name; 
         let normalizedName = name.toLowerCase();
+
         if(normalizedName.includes('linh')) {
-            window.isMainLinh = true;
+            window.isMainLinh = true; // Xác nhận là Linh
             window.goToScreen('screen-welcome-linh');
         } else {
-            window.isMainLinh = false;
+            window.isMainLinh = false; // Xác nhận là Khách
             document.getElementById('guestWelcomeTitle').innerText = `Hế nhô ${name}! 🥳`;
             window.goToScreen('screen-welcome-guest');
         }
     };
 
+    // --- HÀM BẤT NGỜ (FIX LỖI NHẢY SAI MÀN HÌNH) ---
     window.triggerSurprise = function() {
-        if(isMainLinh) {
-            goToScreen('screen-surprise-linh');
+        if(window.isMainLinh === true) {
+            window.goToScreen('screen-surprise-linh');
             startFloatingWishes();
         } else {
-            goToScreen('screen-surprise-guest');
+            window.goToScreen('screen-surprise-guest');
         }
     };
 
+    // --- THÔNG BÁO TÙY CHỈNH ---
     window.customAlert = function(message, icon = '✨', callback = null) {
         document.getElementById('alert-message').innerText = message;
         document.getElementById('alert-icon').innerText = icon;
@@ -741,23 +745,23 @@
         if (alertCallback) { alertCallback(); alertCallback = null; }
     };
 
-    // --- LOGIC FIREBASE (GỬI & NHẬN LỜI CHÚC) ---
-
+    // --- GỬI LỜI CHÚC ---
     window.submitWish = function() {
         let content = document.getElementById('wishInput').value.trim();
-        if(!content) { customAlert('Nhập xíu tâm tình cho chủ tiệc vui nha ^^!', '✍️'); return; }
+        if(!content) { window.customAlert('Nhập xíu tâm tình cho chủ tiệc vui nha ^^!', '✍️'); return; }
         
         push(wishesRef, { 
-        sender: window.currentUser, 
-        text: content, 
-        timestamp: Date.now() 
+            sender: window.currentUser, 
+            text: content, 
+            timestamp: Date.now() 
         }).then(() => {
             window.customAlert("Thiệp đã trao tận tay chị Linh rồi nhó!", '🚀', function() {
-                goToScreen('screen-gift');
+                window.goToScreen('screen-gift');
             });
         });
     };
 
+    // --- LỜI CHÚC BAY LÊN ---
     function startFloatingWishes() {
         const container = document.getElementById('wishes-container');
         onValue(wishesRef, (snapshot) => {
@@ -769,33 +773,36 @@
                     el.className = 'cloud-wish';
                     el.innerText = item.text;
                     el.style.left = Math.floor(Math.random() * 60) + 10 + "%";
-                    el.style.animationDelay = (index * 2) + "s";
+                    el.style.animationDelay = (index * 1.5) + "s";
                     container.appendChild(el);
                 });
             }
         });
     }
 
-    // --- LOGIC QUÀ TẶNG & HIỆU ỨNG (BOOM/PHÁO HOA/XOAY MÁY) ---
-
+    // --- KIỂM TRA XOAY MÀN HÌNH ---
     window.checkRotationRequirement = function() {
         const hint = document.getElementById('rotate-hint');
         const giftContent = document.getElementById('gift-content-wrapper');
         const isPortrait = window.innerHeight > window.innerWidth;
         const currentScreen = document.querySelector('.screen.active');
+
         if (currentScreen && currentScreen.id === 'screen-gift') {
-            if (isMainLinh && isPortrait) {
-                hint.style.display = 'flex'; giftContent.style.display = 'none';
+            if (window.isMainLinh === true && isPortrait) {
+                hint.style.display = 'flex'; 
+                giftContent.style.display = 'none';
             } else {
-                hint.style.display = 'none'; giftContent.style.display = 'block';
+                hint.style.display = 'none'; 
+                giftContent.style.display = 'block';
             }
         }
     };
-    window.addEventListener('resize', checkRotationRequirement);
+    window.addEventListener('resize', window.checkRotationRequirement);
 
+    // --- MỞ QUÀ & HIỆU ỨNG ---
     window.handleOpenGift = function() {
-        if (isMainLinh && window.innerHeight > window.innerWidth) {
-            customAlert("Xoay ngang điện thoại đã chị ơi!", "🔄"); return;
+        if (window.isMainLinh === true && window.innerHeight > window.innerWidth) {
+            window.customAlert("Xoay ngang điện thoại đã chị ơi!", "🔄"); return;
         }
         const container = document.getElementById('app-container');
         const blast = document.getElementById('boom-blast');
