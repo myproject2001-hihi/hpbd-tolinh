@@ -311,28 +311,46 @@
 
         /* --- FIX GIAO DIỆN KHI XOAY NGANG ĐIỆN THOẠI --- */
         @media (orientation: landscape) and (max-height: 500px) {
-            /* Thu nhỏ khung ảnh phim để không chiếm hết chiều cao */
+            /* 1. Căn giữa toàn bộ nội dung màn hình theo chiều dọc */
+            #screen-journey {
+                justify-content: center !important; 
+                padding: 5px !important;
+            }
+
+            /* 2. Thu nhỏ tiêu đề và bỏ margin thừa */
+            #screen-journey h2 {
+                font-size: 18px !important;
+                margin-bottom: 2px !important;
+                margin-top: 0 !important;
+            }
+
+            /* 3. Thu hẹp tối đa khoảng cách của container ảnh */
+            .film-container {
+                margin-top: 0 !important;
+                margin-bottom: 5px !important; /* Chỉ cách nút 5px */
+                padding: 5px 0 !important;
+            }
+
             .film-card {
-                width: 220px; 
-                padding: 8px;
+                width: 160px !important; /* Giữ kích thước thon gọn */
+                padding: 5px !important;
             }
 
             .film-card img {
-                height: 120px; /* Giảm chiều cao ảnh */
+                height: 90px !important;
             }
 
-            .film-card .note {
-                font-size: 13px;
-                margin-top: 8px;
-            }
-
-            .film-container {
-                margin-bottom: 15px;
-            }
-
-            /* Màn hình quà tặng cũng cần thu nhỏ ảnh */
-            .gift-image-wrapper img {
-                width: 150px;
+            /* 4. ĐƯA NÚT BẤM VỀ SÁT HÌNH ẢNH */
+            #screen-journey button {
+                position: relative !important; /* Bỏ fixed để nó đi theo sau khối ảnh */
+                bottom: auto !important;
+                right: auto !important;
+                margin-top: 0 !important; /* Xóa margin top để gần hình hơn */
+                padding: 8px 25px !important;
+                font-size: 12px !important;
+                width: auto !important;
+                align-self: center; /* Căn giữa nút (nếu muốn nằm phải thì đổi thành flex-end) */
+                box-shadow: 0 4px 10px rgba(255, 111, 105, 0.3);
             }
         }
         /* Style cho Custom Alert */
