@@ -1138,34 +1138,35 @@
         const btnGift = document.getElementById('btn-final-gift');
         const sound = document.getElementById('notif-sound');
 
-        // Dừng hiệu ứng rung và timer cũ
+        // --- 1. DỌN DẸP TIN NHẮN CŨ ---
+        // Hủy ngay bộ đếm giờ nhắc nhở của tin nhắn trước đó (nếu user bấm sớm)
+        if (window.idleTimer) {
+            clearTimeout(window.idleTimer);
+            window.idleTimer = null;
+        }
+        // Dừng hiệu ứng rung phong bì
         btnNext.classList.remove('shake-envelope');
-        clearTimeout(idleTimer);
 
+        // --- 2. XỬ LÝ HIỆN TIN NHẮN MỚI ---
         if (currentWishIndex < allWishes.length) {
             const item = allWishes[currentWishIndex];
             
-            // 1. Khai báo danh sách ảnh avatar (Đảm bảo file có trong folder images/)
-            const femaleAvatars = [
-                'images/ava1.png',
-                'images/ava2.png',
-                'images/ava3.png',
-                'images/ava4.png',
-                'images/ava5.png',
-                'images/ava6.png',
-                'images/ava7.png',
-                'images/ava8.png',
-                'images/ava9.png',
-                'images/ava10.png',
-                'images/ava11.png',
-                'images/ava12.png',
-                'images/ava13.png'
-            ];
+            // PHÁT TIẾNG "TING" NGAY LẬP TỨC (Âm thanh báo có tin nhắn mới tới)
+            if (sound) {
+                sound.pause();
+                sound.currentTime = 0; // Reset về đầu để phát lại ngay
+                sound.play().catch(() => {}); 
+            }
 
-            // 2. Định nghĩa biến randomAva TRƯỚC khi sử dụng (Fix lỗi ReferenceError)
+            // Tạo giao diện tin nhắn (Giữ nguyên phần avatar bạn đã làm)
+            const femaleAvatars = [
+                'images/ava1.png', 'images/ava2.png', 'images/ava3.png', 
+                'images/ava4.png', 'images/ava5.png', 'images/ava6.png',
+                'images/ava7.png', 'images/ava8.png', 'images/ava9.png',
+                'images/ava10.png', 'images/ava11.png', 'images/ava12.png', 'images/ava13.png'
+            ];
             const randomAva = femaleAvatars[currentWishIndex % femaleAvatars.length];
 
-            // 3. Tạo tin nhắn mới với cấu trúc chuẩn Messenger
             let chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
             chatItem.innerHTML = `
@@ -1179,22 +1180,22 @@
             `;
             
             container.appendChild(chatItem);
-            
-            // Cuộn xuống tin nhắn mới nhất
             container.scrollTop = container.scrollHeight;
             
             currentWishIndex++;
 
-            // Nếu còn tin nhắn, bắt đầu đếm ngược 8 giây để nhắc nhở
+            // --- 3. THIẾT LẬP NHẮC NHỞ CHO TIN TIẾP THEO ---
             if (currentWishIndex < allWishes.length) {
+                // Sau 8 giây nếu chưa bấm tin tiếp theo, phong bì sẽ rung và kêu "Ting" nhắc nhở
                 window.idleTimer = setTimeout(() => {
                     btnNext.classList.add('shake-envelope');
-                    if(sound) {
-                        sound.play().catch(()=>{}); 
+                    if (sound) {
+                        sound.currentTime = 0;
+                        sound.play().catch(() => {});
                     }
                 }, 8000); 
             } else {
-                // Đã hết tin nhắn
+                // Nếu là tin nhắn cuối cùng
                 document.getElementById('msg-count').innerText = "Đã đọc hết tin nhắn rồi nè! ✨";
                 btnNext.style.display = 'none';
                 btnGift.style.display = 'block';
