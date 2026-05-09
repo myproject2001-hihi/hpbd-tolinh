@@ -362,13 +362,36 @@
         display: none; justify-content: center; align-items: center;
         z-index: 1000; opacity: 0; transition: opacity 2s;
     }
+
+    /* --- HIỆU ỨNG RUNG RINH CHO HỘP QUÀ --- */
     .gift-box {
-        font-size: 100px; /* Khôi phục độ to chuẩn Hình 5 */
+        font-size: 100px;
+        display: inline-block;
         cursor: pointer;
-        animation: shake 2s infinite cubic-bezier(.36,.07,.19,.97) both;
-        transform-origin: bottom;
+        /* Gọi lại hiệu ứng rung */
+        animation: giftShake 1s infinite ease-in-out; 
         position: relative;
-        z-index: 100; /* Đảm bảo nhấn được */
+        z-index: 100;
+    }
+
+    @keyframes giftShake {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(-10deg); }
+        40% { transform: rotate(10deg); }
+        60% { transform: rotate(-7deg); }
+        80% { transform: rotate(7deg); }
+    }
+
+    /* Đảm bảo hộp quà không bị đứng yên khi nhấn */
+    .shake-hard {
+        animation: shakeHard 0.1s infinite !important;
+    }
+
+    @keyframes shakeHard {
+        0% { transform: translate(2px, 2px); }
+        25% { transform: translate(-2px, -2px); }
+        50% { transform: translate(-3px, 3px); }
+        75% { transform: translate(3px, -3px); }
     }
 
     /* Xóa bỏ đoạn CSS ép ẩn hộp quà trong Media Query để tránh lỗi ko nhấn được */
@@ -417,7 +440,7 @@
         #app-container { background: none !important; }
         
         #screen-journey { justify-content: center !important; padding: 5px !important; }
-        #screen-journey h2 { font-size: 18px !important; margin-bottom: 2px !important; }
+        #screen-journey h2 { font-size: 15px !important; margin-bottom: 2px !important; }
 
         .film-container { margin-bottom: 5px !important; padding: 5px 0 !important; }
         .film-card { width: 160px !important; padding: 5px !important; }
@@ -1046,23 +1069,23 @@
 
     // --- KIỂM TRA XOAY MÀN HÌNH ---
     window.checkRotationRequirement = function() {
-        // 1. KIỂM TRA THIẾT BỊ: Nếu là PC/Laptop thì bỏ qua toàn bộ cảnh báo
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // 1. KIỂM TRA ĐANG GÕ CHỮ: Nếu đang hiện bàn phím thì ẩn hết cảnh báo để người dùng nhập liệu
+        const isTyping = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
         
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const hintPortrait = document.getElementById('hint-must-portrait');
         const hintLandscape = document.getElementById('hint-must-landscape');
         const giftContent = document.getElementById('gift-content-wrapper');
         const currentScreen = document.querySelector('.screen.active');
 
-        // Nếu không phải điện thoại, ẩn hết cảnh báo và hiện nội dung rồi thoát hàm
-        if (!isMobile) {
+        // Nếu không phải mobile HOẶC đang gõ chữ -> Ẩn hết cảnh báo
+        if (!isMobile || isTyping) {
             if (hintPortrait) hintPortrait.style.display = 'none';
             if (hintLandscape) hintLandscape.style.display = 'none';
             if (giftContent) giftContent.style.display = 'block';
             return; 
         }
 
-        // 2. NẾU LÀ ĐIỆN THOẠI -> TIẾP TỤC LOGIC ÉP XOAY MÁY
         if (!currentScreen) return;
 
         const rotateName = document.getElementById('rotate-user-name');
