@@ -680,13 +680,6 @@
     <!-- MÀN HÌNH 4: HỘP QUÀ & PHẦN QUÀ HÌNH ẢNH (CHUNG) -->
     <div id="screen-gift" class="screen">
     <!-- Lời nhắc xoay máy cho Linh -->
-    <!-- Cảnh báo 1: Yêu cầu để máy ĐỨNG (Dành cho Màn 1, 2, 3) -->
-    <div id="hint-must-portrait" class="rotate-overlay">
-        <div class="rotate-icon">📱</div>
-        <h2>Xoay đứng máy lại nè!</h2>
-        <p>Giao diện này xem ở màn hình đứng mới đẹp bạn nhé!</p>
-    </div>
-
     <!-- Cảnh báo 2: Yêu cầu để máy NGANG (Dành cho Màn 4) -->
     <div id="hint-must-landscape" class="rotate-overlay">
         <div class="rotate-icon" style="transform: rotate(90deg);">📱</div>
@@ -1053,21 +1046,29 @@
 
     // --- KIỂM TRA XOAY MÀN HÌNH ---
     window.checkRotationRequirement = function() {
-        const currentScreen = document.querySelector('.screen.active');
-        if (!currentScreen) return;
-
+        // 1. KIỂM TRA THIẾT BỊ: Nếu là PC/Laptop thì bỏ qua toàn bộ cảnh báo
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         const hintPortrait = document.getElementById('hint-must-portrait');
         const hintLandscape = document.getElementById('hint-must-landscape');
         const giftContent = document.getElementById('gift-content-wrapper');
+        const currentScreen = document.querySelector('.screen.active');
+
+        // Nếu không phải điện thoại, ẩn hết cảnh báo và hiện nội dung rồi thoát hàm
+        if (!isMobile) {
+            if (hintPortrait) hintPortrait.style.display = 'none';
+            if (hintLandscape) hintLandscape.style.display = 'none';
+            if (giftContent) giftContent.style.display = 'block';
+            return; 
+        }
+
+        // 2. NẾU LÀ ĐIỆN THOẠI -> TIẾP TỤC LOGIC ÉP XOAY MÁY
+        if (!currentScreen) return;
+
         const rotateName = document.getElementById('rotate-user-name');
-        
-        // Lấy trạng thái máy: Cao > Rộng là Đứng (Portrait)
         const isPortrait = window.innerHeight > window.innerWidth;
+        if(rotateName) rotateName.innerText = (window.currentUser || "Bạn") + " ơi!";
 
-        // Cập nhật tên người dùng cho màn 4
-        if(rotateName) rotateName.innerText = window.currentUser + " ơi!";
-
-        // --- LOGIC BẮT BUỘC ---
         if (currentScreen.id === 'screen-gift') {
             // MÀN 4: BẮT BUỘC NGANG
             if (isPortrait) {
@@ -1079,13 +1080,11 @@
                 if(giftContent) giftContent.style.display = 'block';
             }
         } else {
-            // CÁC MÀN CÒN LẠI (1, 2, 3, Video): BẮT BUỘC ĐỨNG
+            // CÁC MÀN KHÁC: BẮT BUỘC ĐỨNG
             if (!isPortrait) {
-                // Nếu người dùng đang để máy NGANG ở các màn này
                 hintPortrait.style.display = 'flex';
                 hintLandscape.style.display = 'none';
             } else {
-                // Đã để máy ĐỨNG đúng chuẩn
                 hintPortrait.style.display = 'none';
                 hintLandscape.style.display = 'none';
             }
