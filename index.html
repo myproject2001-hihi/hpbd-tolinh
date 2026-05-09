@@ -286,6 +286,19 @@
         transition: transform 0.2s;
     }
 
+    #btn-final-gift {
+        display: none; /* Mặc định ẩn hoàn toàn */
+        margin-top: 20px;
+        background: linear-gradient(45deg, #ff8a8f, #ff6f69);
+        padding: 15px 30px;
+        border-radius: 25px;
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 10px 20px rgba(255, 111, 105, 0.3);
+        /* Hiệu ứng nảy ra khi xuất hiện */
+        animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
     /* Container chứa tiêu đề và phong bì */
     .envelope-container {
         display: flex; /* Sử dụng Flexbox để đưa lên cùng hàng */
@@ -360,8 +373,35 @@
 
     /* Xóa bỏ đoạn CSS ép ẩn hộp quà trong Media Query để tránh lỗi ko nhấn được */
     @media (orientation: portrait) and (max-width: 768px) {
-        #rotate-hint { display: flex; }
-        #gift-content-wrapper { display: none; } /* Chỉ ẩn khi máy đứng */
+        /* Style chung cho lớp phủ cảnh báo xoay */
+        .rotate-overlay {
+            display: none; /* Mặc định ẩn, JS sẽ điều khiển */
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: rgba(255, 182, 185, 0.98);
+            z-index: 10000; /* Nằm trên cùng tất cả mọi thứ */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .rotate-icon {
+            font-size: 60px;
+            animation: rotating 2s infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes rotating {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* Đảm bảo nội dung màn 4 không bị tràn khi máy đứng (vì lúc đó nó đang bị ẩn) */
+        #gift-content-wrapper { width: 100%; }
     }
 
     #giftResult.active-show { opacity: 1; }
@@ -638,13 +678,20 @@
     <!-- MÀN HÌNH 4: HỘP QUÀ & PHẦN QUÀ HÌNH ẢNH (CHUNG) -->
     <div id="screen-gift" class="screen">
     <!-- Lời nhắc xoay máy cho Linh -->
-    <div id="rotate-hint">
-        <div style="font-size: 50px; animation: rotating 2s infinite;">🔄</div>
-        <!-- Chỗ này sẽ dùng JS để đổi chữ "Chị Linh" thành tên khách -->
-        <h2 id="rotate-user-name" style="color: white;">Bạn ơi!</h2>
-        <p style="color: white; font-weight: bold;">Nhanh lên...Xoay điện thoại lại để mở quà nè!</p>
+    <!-- Cảnh báo 1: Yêu cầu để máy ĐỨNG (Dành cho Màn 1, 2, 3) -->
+    <div id="hint-must-portrait" class="rotate-overlay">
+        <div class="rotate-icon">📱</div>
+        <h2>Xoay đứng máy lại nè!</h2>
+        <p>Giao diện này xem ở màn hình đứng mới đẹp bạn nhé!</p>
     </div>
 
+    <!-- Cảnh báo 2: Yêu cầu để máy NGANG (Dành cho Màn 4) -->
+    <div id="hint-must-landscape" class="rotate-overlay">
+        <div class="rotate-icon" style="transform: rotate(90deg);">📱</div>
+        <h2 id="rotate-user-name">Bạn ơi!</h2>
+        <p>Nhanh lên... Xoay ngang máy để khui quà nhé! 🎁</p>
+    </div>
+    
     <div id="gift-content-wrapper" style="text-align: center; width: 100%;">
         <div id="boom-blast"></div>
         <div id="fireworks-container"></div>
@@ -917,25 +964,29 @@
 
     window.showNextMessage = function() {
         const container = document.getElementById('wishes-container');
-        const btnNext = document.getElementById('btn-next-message');
-        const btnGift = document.getElementById('btn-final-gift');
+        const btnNext = document.getElementById('btn-next-message'); // Nút phong bì
+        const btnGift = document.getElementById('btn-final-gift'); // Nút nhận quà
         const sound = document.getElementById('notif-sound');
 
+        // 1. Dọn dẹp timer cũ (nếu Linh bấm sớm hơn 8s)
         if (window.idleTimer) {
             clearTimeout(window.idleTimer);
             window.idleTimer = null;
         }
         btnNext.classList.remove('shake-envelope');
 
+        // 2. Kiểm tra nếu còn tin nhắn để hiện
         if (currentWishIndex < allWishes.length) {
             const item = allWishes[currentWishIndex];
             
+            // Phát tiếng "Ting" báo tin nhắn tới
             if (sound) {
                 sound.pause();
                 sound.currentTime = 0;
                 sound.play().catch(() => {}); 
             }
 
+            // Tạo giao diện tin nhắn chat (Giữ nguyên phần avatar)
             const femaleAvatars = [
                 'images/ava1.png', 'images/ava2.png', 'images/ava3.png', 
                 'images/ava4.png', 'images/ava5.png', 'images/ava6.png',
@@ -943,11 +994,8 @@
                 'images/ava10.png', 'images/ava11.png', 'images/ava12.png', 'images/ava13.png'
             ];
             const randomAva = femaleAvatars[currentWishIndex % femaleAvatars.length];
-
-            // --- BƯỚC 1: XỬ LÝ CHỮ \n TRƯỚC (NẰM NGOÀI HTML) ---
             const textWithNewLines = item.text.split('\\n').join('\n'); 
 
-            // --- BƯỚC 2: TẠO THẺ DIV VÀ GÁN NỘI DUNG (CHỈ GÁN 1 LẦN) ---
             let chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
             chatItem.innerHTML = `
@@ -963,9 +1011,11 @@
             container.appendChild(chatItem);
             container.scrollTop = container.scrollHeight;
             
-            currentWishIndex++;
+            currentWishIndex++; // Tăng đếm sau khi đã hiện tin
 
+            // 3. KIỂM TRA: ĐÂY CÓ PHẢI TIN CUỐI CÙNG KHÔNG?
             if (currentWishIndex < allWishes.length) {
+                // CÒN TIN NHẮN: Thiết lập hẹn giờ 8s nhắc nhở như cũ
                 window.idleTimer = setTimeout(() => {
                     btnNext.classList.add('shake-envelope');
                     if (sound) {
@@ -974,9 +1024,13 @@
                     }
                 }, 8000); 
             } else {
+                // HẾT TIN NHẮN RỒI: 
+                // - Ẩn nút phong bì và dòng nhắc bấm tiếp
+                btnNext.style.display = 'none'; 
                 document.getElementById('msg-count').innerText = "Đã đọc hết tin nhắn rồi nè! ✨";
-                btnNext.style.display = 'none';
-                btnGift.style.display = 'block';
+                
+                // - HIỆN NÚT NHẬN QUÀ RỰC RỠ
+                btnGift.style.display = 'inline-block';
             }
         }
     };
@@ -984,26 +1038,47 @@
     // --- KIỂM TRA XOAY MÀN HÌNH ---
     window.checkRotationRequirement = function() {
         const currentScreen = document.querySelector('.screen.active');
-        if (!currentScreen || currentScreen.id !== 'screen-gift') return;
+        if (!currentScreen) return;
 
-        const hint = document.getElementById('rotate-hint');
+        const hintPortrait = document.getElementById('hint-must-portrait');
+        const hintLandscape = document.getElementById('hint-must-landscape');
         const giftContent = document.getElementById('gift-content-wrapper');
         const rotateName = document.getElementById('rotate-user-name');
         
-        // Đợi 200ms để trình duyệt cập nhật xong kích thước thực tế sau khi xoay
-        setTimeout(() => {
-            const isPortrait = window.innerHeight > window.innerWidth;
-            rotateName.innerText = window.currentUser + " ơi!";
+        // Lấy trạng thái máy: Cao > Rộng là Đứng (Portrait)
+        const isPortrait = window.innerHeight > window.innerWidth;
 
+        // Cập nhật tên người dùng cho màn 4
+        if(rotateName) rotateName.innerText = window.currentUser + " ơi!";
+
+        // --- LOGIC BẮT BUỘC ---
+        if (currentScreen.id === 'screen-gift') {
+            // MÀN 4: BẮT BUỘC NGANG
             if (isPortrait) {
-                hint.style.setProperty('display', 'flex', 'important');
-                giftContent.style.setProperty('display', 'none', 'important');
+                hintLandscape.style.display = 'flex';
+                hintPortrait.style.display = 'none';
+                if(giftContent) giftContent.style.display = 'none';
             } else {
-                hint.style.setProperty('display', 'none', 'important');
-                giftContent.style.setProperty('display', 'block', 'important');
+                hintLandscape.style.display = 'none';
+                if(giftContent) giftContent.style.display = 'block';
             }
-        }, 200);
+        } else {
+            // CÁC MÀN CÒN LẠI (1, 2, 3, Video): BẮT BUỘC ĐỨNG
+            if (!isPortrait) {
+                // Nếu người dùng đang để máy NGANG ở các màn này
+                hintPortrait.style.display = 'flex';
+                hintLandscape.style.display = 'none';
+            } else {
+                // Đã để máy ĐỨNG đúng chuẩn
+                hintPortrait.style.display = 'none';
+                hintLandscape.style.display = 'none';
+            }
+        }
     };
+
+    // Lắng nghe sự kiện xoay máy liên tục
+    window.addEventListener('resize', window.checkRotationRequirement);
+    window.addEventListener('orientationchange', window.checkRotationRequirement);
 
     // Lắng nghe cả sự kiện resize và orientationchange để chắc chắn 100%
     window.addEventListener('resize', window.checkRotationRequirement);
