@@ -977,11 +977,22 @@
 
     // --- HÀM CHUYỂN MÀN HÌNH ---
     window.goToScreen = function(screenId) {
+        // 1. Tìm cái video
+        const video = document.getElementById('birthdayVideo');
+        
+        // 2. Nếu đang có video chạy, dừng nó lại ngay lập tức
+        if (video) {
+            video.pause(); 
+            video.currentTime = 0; // Đưa video về giây thứ 0 để lần sau xem lại từ đầu
+        }
+
+        // 3. Xử lý chuyển màn hình như cũ
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         const target = document.getElementById(screenId);
         if(target) {
             target.classList.add('active');
-            window.checkRotationRequirement();
+            // Gọi hàm kiểm tra xoay màn hình (nếu là màn hình quà tặng)
+            if(window.checkRotationRequirement) window.checkRotationRequirement();
         }
     };
 
@@ -1277,20 +1288,18 @@
     };
     // Hàm hỏi trước khi Skip
     window.askSkip = function() {
-        // Tạm dừng video khi đang hỏi
         const video = document.getElementById('birthdayVideo');
-        video.pause();
+        if(video) video.pause(); // Tạm dừng để hỏi
 
-        // Hiện bảng hỏi với 2 lựa chọn
         document.getElementById('btn-alert-cancel').style.display = 'block';
         document.getElementById('btn-alert-ok').innerText = "Vẫn bỏ qua 😤";
         
         window.customAlert(
-            "Ủa chắc chưa? Clip người ta làm tâm huyết dữ lắm, bỏ qua là hối hận cả đời nhóoo! 🥺", 
+            "Ủa chắc chưa? Clip người ta làm tâm huyết dữ lắm, bỏ qua là hối hận nhóoo! 🥺", 
             "🤨", 
             function() {
-                // Nếu vẫn chọn "Vẫn bỏ qua" (OK)
-                window.triggerSurprise();
+                // Khi nhấn Vẫn bỏ qua, hàm goToScreen ở trên sẽ xử lý việc dừng hẳn video
+                window.triggerSurprise(); 
             }
         );
     };
