@@ -104,6 +104,11 @@
     /* Trên điện thoại đứng thì mới cho rộng ra 80% */
     @media (orientation: portrait) {
         input, textarea { width: 80% !important; }
+        #video-title {
+            font-size: 24px !important; /* Giảm từ 33px xuống 24px để vừa 1 dòng trên iPhone */
+            margin-bottom: 15px !important;
+            padding: 0 10px; /* Thêm lề 2 bên để chữ không chạm mép màn hình */
+        }
     }
 
     textarea { 
@@ -440,7 +445,7 @@
         #app-container { background: none !important; }
         
         #screen-journey { justify-content: center !important; padding: 5px !important; }
-        #screen-journey h2 { font-size: 15px !important; margin-bottom: 2px !important; }
+        #screen-journey h2 { font-size: 16px !important; margin-bottom: 2px !important; }
 
         .film-container { margin-bottom: 5px !important; padding: 5px 0 !important; }
         .film-card { width: 160px !important; padding: 5px !important; }
@@ -455,6 +460,14 @@
 
         .video-wrapper { width: 180px !important; max-width: 180px; }
         #wishes-container { height: 50vh; }
+        #video-title {
+            font-size: 18px !important; /* Cực gọn khi máy nằm ngang */
+            margin-bottom: 5px !important;
+            margin-top: 0 !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.5px;
+        }
     }
 
     /* HIỆU ỨNG CHUNG */
@@ -722,7 +735,7 @@
         <div id="giftResult">
             <img src="https://i.postimg.cc/7ZrBmNbz/12.jpg" id="finalImage" alt="Quà tặng">
             <!-- Nút quay lại ở góc phải -->
-            <button class="btn-back-corner" id="btnBackToJourney" onclick="goToScreen('screen-journey')">⏪ Quay lại</button>
+            <button class="btn-back-corner" id="btnBackToJourney" onclick="handleBackToMessages()">⏪ Quay lại</button>
         </div>
     </div>
 </div>
@@ -844,6 +857,7 @@
 
     // --- KHỞI TẠO BIẾN TOÀN CỤC ---
     window.isMainLinh = false; // Luôn dùng window. để thống nhất
+    window.isMessagesRead = false; // Đánh dấu chưa đọc hết tin nhắn
     window.currentUser = "Khách ẩn danh";
     let alertCallback = null;
 
@@ -982,17 +996,51 @@
             const data = snapshot.val();
             if (data) {
                 allWishes = Object.values(data);
-                currentWishIndex = 0;
-                document.getElementById('wishes-container').innerHTML = '';
-                
-                // Hiện thông báo đầu tiên
-                window.customAlert(`Chị có ${allWishes.length} tin nhắn chưa đọc\ntừ "người hâm mộ"!`, "📩", function() {
-                    // Sau khi nhấn OK, hiện tin đầu tiên luôn
-                    showNextMessage();
-                });
+                const container = document.getElementById('wishes-container');
+                const btnNext = document.getElementById('btn-next-message');
+                const btnGift = document.getElementById('btn-final-gift');
+
+                // NẾU ĐÃ ĐỌC XONG TRƯỚC ĐÓ RỒI -> HIỆN TẤT CẢ LUÔN
+                if (window.isMessagesRead) {
+                    container.innerHTML = '';
+                    allWishes.forEach((item, index) => {
+                        renderSingleMessage(item, index); // Gọi hàm vẽ tin nhắn
+                    });
+                    btnNext.style.display = 'none';
+                    btnGift.style.display = 'inline-block';
+                    document.getElementById('msg-count').innerText = "Toàn bộ lời chúc đây ạ! ❤️";
+                } 
+                // NẾU LÀ LẦN ĐẦU TIÊN VÀO MÀN HÌNH CHAT
+                else {
+                    currentWishIndex = 0;
+                    container.innerHTML = '';
+                    window.customAlert(`Chị có ${allWishes.length} tin nhắn chưa đọc nhó!`, "📩", function() {
+                        showNextMessage();
+                    });
+                }
             }
-        }, { onlyOnce: true }); // Chỉ lấy dữ liệu 1 lần lúc vào màn hình
+        }, { onlyOnce: true });
     };
+
+    // Hàm phụ để vẽ tin nhắn (tách ra để dùng chung cho đẹp)
+    function renderSingleMessage(item, index) {
+        const container = document.getElementById('wishes-container');
+        const femaleAvatars = ['images/ava1.png', 'images/ava2.png', 'images/ava3.png', 'images/ava4.png', 'images/ava5.png', 'images/ava6.png', 'images/ava7.png', 'images/ava8.png', 'images/ava9.png', 'images/ava10.png', 'images/ava11.png', 'images/ava12.png', 'images/ava13.png'];
+        const randomAva = femaleAvatars[index % femaleAvatars.length];
+        const textWithNewLines = item.text.split('\\n').join('\n'); 
+
+        let chatItem = document.createElement('div');
+        chatItem.className = 'chat-item';
+        chatItem.innerHTML = `
+            <div class="chat-avatar"><img src="${randomAva}" style="width: 100%; height: 100%; object-fit: cover;"></div>
+            <div class="chat-bubble-wrapper">
+                <span class="sender-name">${item.sender || "Người thương ẩn danh"}</span>
+                <div class="chat-bubble">${textWithNewLines}</div>
+            </div>
+        `;
+        container.appendChild(chatItem);
+        container.scrollTop = container.scrollHeight;
+    }
 
     window.showNextMessage = function() {
         const container = document.getElementById('wishes-container');
@@ -1056,12 +1104,9 @@
                     }
                 }, 8000); 
             } else {
-                // HẾT TIN NHẮN RỒI: 
-                // - Ẩn nút phong bì và dòng nhắc bấm tiếp
-                btnNext.style.display = 'none'; 
+                window.isMessagesRead = true; // CẮM CỜ: Đã đọc xong toàn bộ!
                 document.getElementById('msg-count').innerText = "Đã đọc hết tin nhắn rồi nè! ✨";
-                
-                // - HIỆN NÚT NHẬN QUÀ RỰC RỠ
+                btnNext.style.display = 'none';
                 btnGift.style.display = 'inline-block';
             }
         }
@@ -1329,6 +1374,12 @@
             track.classList.remove('paused');
         });
     });
+    window.handleBackToMessages = function() {
+        // Quay lại màn hình tin nhắn
+        window.goToScreen('screen-surprise-linh');
+        // Chạy lại hàm load tin nhắn (lúc này biến isMessagesRead đã là true nên nó sẽ hiện hết)
+        window.startFloatingWishes();
+    };
 </script>
 </body>
 </html>
