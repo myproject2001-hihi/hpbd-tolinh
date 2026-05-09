@@ -118,21 +118,67 @@
 
         /* --------- Slide Hành trình (BẢN KHUNG POLAROID ẢNH NGANG) --------- */
         .film-container {
-            width: calc(100% + 40px);
-            margin-left: -20px; 
-            margin-right: -20px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 30px;
+            width: 100vw;
+            margin-left: -20px;
+            overflow-x: auto; /* Cho phép cuộn ngang */
+            overflow-y: hidden;
+            cursor: grab;
             padding: 20px 0;
+            -webkit-overflow-scrolling: touch; /* Cuộn mượt trên iPhone */
+            scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
+        }
+
+        .film-container::-webkit-scrollbar {
+            display: none; /* Ẩn scrollbar trên Chrome/Safari */
         }
 
         .film-track {
             display: flex;
-            gap: 20px; 
-            width: max-content; 
-            animation: scroll-left 100s linear infinite; /* KÉO THỜI GIAN LÊN 18s DO BĂNG ẢNH ĐÃ DÀI HƠN */
-            padding-left: 20px; 
+            gap: 20px;
+            width: max-content;
+            padding-left: 20px;
+            padding-right: 20px;
+            /* Bỏ animation CSS cũ, chúng ta sẽ dùng JS để điều khiển mượt hơn */
+            animation: none !important; 
+        }
+
+        /* --- 2. FIX NÚT BẤM KHI XOAY NGANG (LANDSCAPE) --- */
+        @media (orientation: landscape) and (max-height: 500px) {
+            #screen-journey {
+                justify-content: flex-start !important; /* Dàn từ trên xuống */
+                padding-top: 5px !important;
+            }
+
+            #screen-journey h2 {
+                font-size: 18px !important;
+                margin-bottom: 5px !important;
+            }
+
+            .film-container {
+                padding: 5px 0 !important;
+                margin-bottom: 5px !important;
+            }
+
+            .film-card {
+                width: 150px !important;
+                padding: 5px !important;
+            }
+
+            .film-card img {
+                height: 80px !important;
+            }
+
+            /* NÚT BẤM: Biến thành nút nổi ở góc phải để không đè chữ */
+            #screen-journey button {
+                position: fixed;
+                bottom: 15px;
+                right: 20px;
+                width: auto !important;
+                padding: 8px 20px !important;
+                font-size: 12px !important;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
         }
 
         /* Xóa bỏ :hover cũ, thay bằng class .paused này */
@@ -793,12 +839,12 @@
                 </div>
 
                 <div class="film-card">
-                    <img src="images/anh12.jpg" alt="Memory 11">
+                    <img src="images/anh12.jpg" alt="Memory 12">
                     <div class="note">Content nhìn có vẻ hiền, nhưng khi cầm máy là ghiền selfie.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="images/anh13.jpg" alt="Memory 11">
+                    <img src="images/anh13.jpg" alt="Memory 13">
                     <div class="note">Linh tóc xoăn, deadline không xoắn.</div>
                 </div>
 
@@ -859,12 +905,12 @@
                 </div>
 
                 <div class="film-card">
-                    <img src="images/anh12.jpg" alt="Memory 11">
+                    <img src="images/anh12.jpg" alt="Memory 12">
                     <div class="note">Content nhìn có vẻ hiền, nhưng khi cầm máy là ghiền selfie.</div>
                 </div>
 
                 <div class="film-card">
-                    <img src="images/anh13.jpg" alt="Memory 11">
+                    <img src="images/anh13.jpg" alt="Memory 13">
                     <div class="note">Linh tóc xoăn, deadline không xoắn.</div>
                 </div>
 
@@ -972,6 +1018,72 @@
 </div>
 
 <script type="module">
+    // --- LOGIC CUỘN PHIM THÔNG MINH ---
+    let isDragging = false;
+    let startX;
+    let scrollLeft;
+    let autoScrollSpeed = 1; // Tốc độ trượt (tăng nếu muốn nhanh hơn)
+    let scrollInterval;
+
+    function initFilmTrack() {
+        const container = document.querySelector('.film-container');
+        const track = document.querySelector('.film-track');
+
+        // 1. Hàm tự động trượt
+        const startAutoScroll = () => {
+            scrollInterval = setInterval(() => {
+                if (!isDragging) {
+                    container.scrollLeft += autoScrollSpeed;
+                    // Nếu trượt đến cuối (bản sao), quay lại đầu (vòng lặp vô tận)
+                    if (container.scrollLeft >= track.scrollWidth / 2) {
+                        container.scrollLeft = 0;
+                    }
+                }
+            }, 20);
+        };
+
+        // 2. Xử lý kéo bằng chuột/tay
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+
+        container.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startX = e.touches[0].pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+
+        const stopDragging = () => {
+            isDragging = false;
+        };
+
+        container.addEventListener('mouseleave', stopDragging);
+        container.addEventListener('mouseup', stopDragging);
+        container.addEventListener('touchend', stopDragging);
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 2; // Tốc độ kéo
+            container.scrollLeft = scrollLeft - walk;
+        });
+
+        container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const x = e.touches[0].pageX - container.offsetLeft;
+            const walk = (x - startX) * 2;
+            container.scrollLeft = scrollLeft - walk;
+        });
+
+        startAutoScroll();
+    }
+
+    // Gọi hàm này sau khi màn hình được load (hoặc trong goToScreen)
+    window.addEventListener('load', initFilmTrack);
+
     // 1. Nhúng thư viện Firebase Online
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
