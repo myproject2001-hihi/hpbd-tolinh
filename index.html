@@ -906,6 +906,8 @@
         
         <!-- Âm thanh tin nhắn -->
         <audio id="notif-sound" src="ting.mp3" preload="auto"></audio>
+        <!-- Nhạc nền chính (để chế độ loop để tự động phát lại khi hết) -->
+        <audio id="bg-music" src="bg-music.mp3" loop preload="auto"></audio>
     </div>
 
     <!-- MÀN HÌNH 3 (Cho USER KHÁC): FORM GHI THIỆP CHÚC MỪNG -->
@@ -985,21 +987,38 @@
 
     // --- HÀM CHUYỂN MÀN HÌNH ---
     window.goToScreen = function(screenId) {
-        // 1. Tìm cái video
         const video = document.getElementById('birthdayVideo');
+        const bgMusic = document.getElementById('bg-music');
         
-        // 2. Nếu đang có video chạy, dừng nó lại ngay lập tức
+        // --- 1. XỬ LÝ VIDEO ---
         if (video) {
             video.pause(); 
-            video.currentTime = 0; // Đưa video về giây thứ 0 để lần sau xem lại từ đầu
+            video.currentTime = 0;
         }
 
-        // 3. Xử lý chuyển màn hình như cũ
+        // --- 2. XỬ LÝ NHẠC NỀN (MIXER LOGIC) ---
+        if (bgMusic) {
+            if (screenId === 'screen-video') {
+                // VÀO MÀN VIDEO: Tắt nhạc nền để nghe tiếng clip
+                bgMusic.pause();
+            } 
+            else if (screenId === 'screen-surprise-linh') {
+                // VÀO MÀN TIN NHẮN: Bật nhạc nhưng nhỏ lại (volume 0.3) để nghe tiếng "Ting"
+                bgMusic.volume = 0.3; 
+                bgMusic.play().catch(() => { console.log("Chờ tương tác để phát nhạc"); });
+            } 
+            else if (screenId === 'screen-journey' || screenId === 'screen-gift' || screenId === 'screen-surprise-guest') {
+                // CÁC MÀN KHÁC: Bật nhạc to rõ (volume 1.0)
+                bgMusic.volume = 1.0;
+                bgMusic.play().catch(() => { console.log("Chờ tương tác để phát nhạc"); });
+            }
+        }
+
+        // --- 3. XỬ LÝ CHUYỂN MÀN HÌNH ---
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         const target = document.getElementById(screenId);
         if(target) {
             target.classList.add('active');
-            // Gọi hàm kiểm tra xoay màn hình (nếu là màn hình quà tặng)
             if(window.checkRotationRequirement) window.checkRotationRequirement();
         }
     };
